@@ -1,35 +1,35 @@
 import io.javalin.Javalin;
-import java.util.HashMap;
-import java.util.Map;
 
-import io.javalin.rendering.JavalinRenderer;
-import io.javalin.rendering.template.JavalinJtwig;
-import org.jtwig.JtwigModel;
-import org.jtwig.JtwigTemplate;
-import io.javalin.Javalin;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class Server {
 
+    private static List<Player> players = new ArrayList<>();
+
     public static void main(String[] args) {
+
         Javalin app = Javalin.create()
                 .enableStaticFiles("/public")
-                .start(7777);
+                .start(7770);
 
-        app.post("/create-gotchi", ctx -> {
-            ctx.formParam("nickname");
+        app.post("/", ctx -> {
             String nickname = ctx.formParam("nickname");
-            nickname = String.format("Hello %s", nickname);
-            ctx.html(nickname);
+            players.add(new Player(nickname));
+            ctx.sessionAttribute("nickname", nickname);
+            ctx.redirect("/create-gotchi");
+        });
+
+        app.get("/", ctx -> {
+            ctx.render("public/login.twig");
         });
 
         app.get("/create-gotchi", ctx -> {
-        });
-
-        app.get("/test", ctx -> {
-           ctx.render("public/index1.jtwig", model("nickname", "Lex"));
+            ctx.render("public/create-gotchi.html.twig", model("nickname", ctx.sessionAttribute("nickname")));
         });
     }
 
 }
+
